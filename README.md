@@ -2,9 +2,13 @@
 Scrolling picture app
 
 For desktops and laptops only. Not for mobile.
+
 Java 9 or later required.
+
 Repository contains Netbeans 9 directory structure and files
-dist subdirectory contains necessary .jar file
+
+dist subdirectory contains necessary .jar file.
+
 java -cp ShadowsBlue.jar hornedowl.shadowsblue.ShadowsFrame
 
 Simple picture viewing app that will scroll your local pictures across top of computer screen.
