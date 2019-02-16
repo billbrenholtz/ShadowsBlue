@@ -34,14 +34,15 @@ package hornedowl.shadowsblue;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_RENDERING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_RENDER_SPEED;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
 import java.beans.PropertyChangeEvent;
@@ -50,13 +51,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
  * Animation images translating around a canvas.
  */
 @SuppressWarnings("serial")
-final class TransformAnim extends JPanel implements PropertyChangeListener {
+class TransformAnim extends JPanel implements PropertyChangeListener, MouseListener, KeyListener {
 
     private List<Thimg> movers;
     private String picRootDir;
@@ -70,8 +74,11 @@ final class TransformAnim extends JPanel implements PropertyChangeListener {
     private volatile Thread animationThread;
     private ImageResizer resizer;
     private boolean resizing = false;
+    private final Rectangle screenRect;
+    private JFrame parent;
+    private TopXferHandler handler;
 
-    public TransformAnim() {
+    public TransformAnim(JFrame parent, Rectangle rect) {
 
         //Use settings from last run
         propDude = new PropertyDude();
@@ -81,21 +88,20 @@ final class TransformAnim extends JPanel implements PropertyChangeListener {
 
         //some empty list for now
         movers = new ArrayList<>();
-        //movers = Collections.synchronizedList(new ArrayList<>());
 
-        //Get maximum screen real estate
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice gd = ge.getDefaultScreenDevice();
-        GraphicsConfiguration gc = gd.getDefaultConfiguration();
-        Rectangle screenRect = gc.getBounds();
+        screenRect = rect;
+        this.parent = parent;
 
         biw = screenRect.width;
 
         //Drag and drop handler
-        TopXferHandler handler = new TopXferHandler();
+        handler = new TopXferHandler();
         handler.addPropertyChangeListener(this);
 
         setTransferHandler(handler);
+        addMouseListener(this);
+        addKeyListener(this);
+
     }
 
     //traverse a directory to get image files names
@@ -172,6 +178,70 @@ final class TransformAnim extends JPanel implements PropertyChangeListener {
             }
         }
         g2.dispose();
+    }
+
+    //display full image when image is clicked on
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+        if (movers.isEmpty()) {
+            return;
+        }
+
+        int xpos = e.getX();
+        int ypos = e.getY();
+        Thimg xthimg = null;
+        for (int i = 0; i < movers.size(); i++) {
+            //Determine who was clicked on, if any, by x position
+            if (xpos >= movers.get(i).getX() && xpos < (movers.get(i).getX() + movers.get(i).getThumbWidth())) {
+                xthimg = movers.get(i);
+                break;
+            }
+        }
+        if (xthimg != null) {
+            PopupDialoger pd = new PopupDialoger(parent, screenRect);
+            //noinspection unused
+            JDialog jd = pd.createFull(xthimg, xpos, ypos);
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    //pause animation
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        stop();
+    }
+
+    //restart animation
+    @Override
+    public void mouseExited(MouseEvent e) {
+        start();
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+//        displayInfo(e, "KEY PRESSED: ");
+        int keyCode = e.getKeyCode();
+        int modifiersEx = e.getModifiersEx();
+        //ctnrl-alt-u
+        if (keyCode == 85 && modifiersEx == 640) {
+            JOptionPane.showMessageDialog(this, "Created by Bill Brenholtz");
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
     }
 
     public void start() {
