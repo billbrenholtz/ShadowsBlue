@@ -43,6 +43,9 @@ class ShadowsFrame extends JFrame implements MouseListener, KeyListener {
         myAnim.setPreferredSize(new Dimension(screenRect.width, myAnim.getBih()));
         myDude = new PropertyDude();
 
+    }
+
+    public void init() {
         setTitle("Shadows Blue");
         setLayout(new BorderLayout());
         add("Center", myAnim);
@@ -72,6 +75,7 @@ class ShadowsFrame extends JFrame implements MouseListener, KeyListener {
         addKeyListener(this);
 
         pack();
+
     }
 
     //display full image when image is clicked on
@@ -125,6 +129,7 @@ class ShadowsFrame extends JFrame implements MouseListener, KeyListener {
 
     public static void main(String argv[]) {
         ShadowsFrame frame = new ShadowsFrame();
+        frame.init();
         frame.setVisible(true);
         try {
             frame.getMyAnim().getSerializedImages();
@@ -152,60 +157,4 @@ class ShadowsFrame extends JFrame implements MouseListener, KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
     }
-
-// --Commented out by Inspection START (3/29/18 3:52 PM):
-//    private void displayInfo(KeyEvent e, String keyStatus) {
-//
-//        //You should only rely on the key char if the event
-//        //is a key typed event.
-//        int id = e.getID();
-//        String keyString;
-//        if (id == KeyEvent.KEY_TYPED) {
-//            char c = e.getKeyChar();
-//            keyString = "key character = '" + c + "'";
-//        } else {
-//            int keyCode = e.getKeyCode();
-//            keyString = "key code = " + keyCode
-//                    + " ("
-//                    + KeyEvent.getKeyText(keyCode)
-//                    + ")";
-//        }
-//
-//        int modifiersEx = e.getModifiersEx();
-//        String modString = "extended modifiers = " + modifiersEx;
-//        String tmpString = KeyEvent.getModifiersExText(modifiersEx);
-//        if (tmpString.length() > 0) {
-//            modString += " (" + tmpString + ")";
-//        } else {
-//            modString += " (no extended modifiers)";
-//        }
-//
-//        String actionString = "action key? ";
-//        if (e.isActionKey()) {
-//            actionString += "YES";
-//        } else {
-//            actionString += "NO";
-//        }
-//
-//        String locationString = "key location: ";
-//        int location = e.getKeyLocation();
-//        if (location == KeyEvent.KEY_LOCATION_STANDARD) {
-//            locationString += "standard";
-//        } else if (location == KeyEvent.KEY_LOCATION_LEFT) {
-//            locationString += "left";
-//        } else if (location == KeyEvent.KEY_LOCATION_RIGHT) {
-//            locationString += "right";
-//        } else if (location == KeyEvent.KEY_LOCATION_NUMPAD) {
-//            locationString += "numpad";
-//        } else { // (location == KeyEvent.KEY_LOCATION_UNKNOWN)
-//            locationString += "unknown";
-//        }
-//        System.out.println(keyStatus);
-//        System.out.println(keyString);
-//        System.out.println(modString);
-//        System.out.println(actionString);
-//        System.out.println(locationString);
-//    }
-// --Commented out by Inspection STOP (3/29/18 3:52 PM)
-
 }
