@@ -77,6 +77,7 @@ class ShadowsFrame extends JFrame {
         ShadowsFrame frame = new ShadowsFrame();
         frame.init();
         frame.setVisible(true);
+        frame.getMyAnim().init();
         try {
             frame.getMyAnim().getSerializedImages();
         } catch (IOException | ClassNotFoundException ex) {
