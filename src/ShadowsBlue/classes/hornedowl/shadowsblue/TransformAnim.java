@@ -1,34 +1,3 @@
-/*
- *
- * Copyright (c) 2007, 2011, Oracle and/or its affiliates. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- *   - Neither the name of Oracle nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
- * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 package hornedowl.shadowsblue;
 
 import java.awt.Dimension;
@@ -43,14 +12,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -64,10 +30,7 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
 
     private List<Thimg> movers;
     private String picRootDir;
-
     private int firstInLine;
-    private final PropertyDude propDude;
-
     private final long sleepAmount = 75;
     private int biw, bih;
     private boolean running = false;
@@ -77,24 +40,21 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
     private final Rectangle screenRect;
     private JFrame parent;
     private TopXferHandler handler;
+    private Fetcher fetcher;
 
-    public TransformAnim(JFrame parent, Rectangle rect) {
-
-        //Use settings from last run
-        propDude = new PropertyDude();
-        propDude.getProperties();
-        picRootDir = propDude.getPicRootDir();
-        bih = propDude.getInitialHeight();
+    public TransformAnim(JFrame parent, Fetcher f, Rectangle rect) {
 
         //some empty list for now
         movers = new ArrayList<>();
 
         screenRect = rect;
         this.parent = parent;
+        fetcher = f;
 
         biw = screenRect.width;
+        bih = fetcher.getSavedHeight();
     }
-    
+
     public void init() {
         //Drag and drop handler
         handler = new TopXferHandler();
@@ -102,56 +62,11 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
 
         setTransferHandler(handler);
         addMouseListener(this);
-        addKeyListener(this);        
-    }
-
-    //traverse a directory to get image files names
-    public void collectImages() {
-        Thimg newThimg;
-        DirectoryCrawl dc = new DirectoryCrawl(picRootDir);
-        dc.run();
-        for (Object o : dc.getFileList()) {
-            newThimg = new Thimg((String) o, bih);
-            movers.add(newThimg);
-        }
-        scrambleImages();
-        firstInLine = 0;
-        if (!movers.isEmpty()) {
-            movers.get(firstInLine).setX(getSize().width - movers.get(firstInLine).getThumbWidth());
-        }
-    }
-
-    public void getSerializedImages() throws IOException, ClassNotFoundException {
-        MoversSaver ms = new MoversSaver();
-        Thimg newThimg;
-        List saved = ms.get();
-        for (Object t : saved) {
-            newThimg = (Thimg) t;
-            //serialization did not save these two things
-            newThimg.setThumbImage(newThimg.getFilename(), bih);
-            newThimg.setAfTran(new AffineTransform());
-            movers.add(newThimg);
-        }
-        firstInLine = propDude.getFirstInLine();
-
-    }
-
-    /**
-     * randomize the image list
-     */
-    private void scrambleImages() {
-        Random generator = new Random(System.currentTimeMillis());
-        Thimg thirdThimg;
-        int pick;
-        for (int i = 0; i < movers.size(); i++) {
-            pick = i;
-            while (pick == i) {
-                pick = generator.nextInt(movers.size() - 1);
-            }
-            thirdThimg = movers.get(i);
-            movers.set(i, movers.get(pick));
-            movers.set(pick, thirdThimg);
-        }
+        addKeyListener(this);
+        
+        movers = fetcher.getMovers();
+        picRootDir = fetcher.getPicRootDir();
+        firstInLine = fetcher.getFirstInLine();
     }
 
     @Override
@@ -272,7 +187,9 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
 
             //Clear image cache and get new thumbnails
             movers.clear();
-            collectImages();
+            fetcher.collectImages(picRootDir, getSize());
+            movers= fetcher.getMovers();
+            firstInLine = 0;
 
             start();
         }

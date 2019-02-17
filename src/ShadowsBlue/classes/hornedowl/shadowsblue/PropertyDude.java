@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hornedowl.shadowsblue;
 
 import java.io.File;
@@ -13,14 +8,19 @@ import java.util.Properties;
 
 /**
  *
- * @author liberty
+ * @author  Bill Brenholtz
+ * 
+ * Read and write the properties file that contains the current starting
+ * directory, the index of Thimg that is on the furthest right position of the screen
+ * and the current window height
+ * 
  */
 class PropertyDude {
     
     private final Properties p;
-    private String picRootDir;
-    private String strHeight;
-    private String firstInLine;
+    private String picRootDir;      //root directory of images
+    private String strHeight;       //last height of the window
+    private String firstInLine;     //index of first Thimg in line
     
     public PropertyDude() {
         p = new Properties(System.getProperties());        
@@ -53,7 +53,10 @@ class PropertyDude {
     }
 
     /**
-     * save the starting directory and random selection in the properties file
+     * save the properties
+     * @param pRootDir - current root directory
+     * @param sHeight - current windows height
+     * @param first - index of Thimg on far right side of window
      */
     public void saveProperties(String pRootDir, int sHeight, int first) {
         String fs = System.getProperty("file.separator");
@@ -65,16 +68,16 @@ class PropertyDude {
             //Yes, Windows
             File hoDir = new File(home + fs + "AppData" + fs + "Local" + fs + "HornedOwl" + fs + "ShadowsBlue");
             if (!hoDir.exists()) {
-                //noinspection unused
-                final boolean b = hoDir.mkdirs();
+                //directory does not exist; make it
+                hoDir.mkdirs();
             }
             where = home + fs + "AppData" + fs + "Local" + fs + "HornedOwl" + fs + "ShadowsBlue";
         } else {
             //No, Linux
             File hoDir = new File(home + fs + ".hornedowl" + fs + "ShadowsBlue");
             if (!hoDir.exists()) {
-                //noinspection unused
-                final boolean b = hoDir.mkdirs();
+                //directory does not exist; make it
+                hoDir.mkdirs();
             }
             where = home + fs + ".hornedowl" + fs + "ShadowsBlue";
         }
