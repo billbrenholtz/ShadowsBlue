@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hornedowl.shadowsblue;
 
 import java.io.File;
@@ -18,10 +13,17 @@ import java.util.List;
 
 /**
  *
- * @author liberty
+ * @author Bill Brenholtz
+ * 
+ * Serialize and deserialize current list of Thimg(s) to disk file to be used
+ * at next start up
  */
 class MoversSaver {
 
+    /**
+     * Serialize current list of Thimg(s) to disk file
+     * @param movers - List<Thimg> to serialize
+     */
     public void save(List movers) {
         String fs = System.getProperty("file.separator");
         String home = System.getProperty("user.home");
@@ -32,16 +34,16 @@ class MoversSaver {
             //Yes, Windows
             File hoDir = new File(home + fs + "AppData" + fs + "Local" + fs + "HornedOwl" + fs + "ShadowsBlue");
             if (!hoDir.exists()) {
-                //noinspection unused
-                final boolean b = hoDir.mkdirs();
+                //its Windows but need to make the directory to hold data
+                hoDir.mkdirs();
             }
             where = home + fs + "AppData" + fs + "Local" + fs + "HornedOwl" + fs + "ShadowsBlue" + fs + "movers";
         } else {
             //No, Linux
             File hoDir = new File(home + fs + ".hornedowl" + fs + "ShadowsBlue");
             if (!hoDir.exists()) {
-                //noinspection unused
-                final boolean b = hoDir.mkdirs();
+                //its Linux and need to make directory to hold data
+                hoDir.mkdirs();
             }
             where = home + fs + ".hornedowl" + fs + "ShadowsBlue" + fs + "movers";
         }
@@ -52,9 +54,12 @@ class MoversSaver {
             oos.writeObject(movers);
         } catch (IOException ignored) {
         }
-
     }
-
+    
+    /**
+     * Deserialize disk file to List<Thimg>
+     * 
+     */
     public List get() throws IOException, ClassNotFoundException {
         String fs = System.getProperty("file.separator");
         String home = System.getProperty("user.home");

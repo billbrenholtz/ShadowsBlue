@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hornedowl.shadowsblue;
 
 import java.util.ArrayList;
@@ -10,13 +5,20 @@ import java.util.List;
 
 /**
  *
- * @author liberty
+ * @author Bill Brenholtz
+ * 
+ * Thread to make a copy of the images at the new height
  */
 class ImageResizer extends Thread {
 
     private final List<Thimg> moversCopy;
     private final int newHeight;
 
+    /**
+     * 
+     * @param movers - the things to copy
+     * @param nh - the new height
+     */
     public ImageResizer(List<Thimg> movers, int nh) {
         moversCopy = new ArrayList<>();
         Thimg copyThimg;
@@ -32,7 +34,7 @@ class ImageResizer extends Thread {
 
     @Override
     public void run() {
-        //resize me and everyone behind me
+        //do resizing
         for (Thimg t : moversCopy) {
             if (Thread.interrupted()) {
                 return;
