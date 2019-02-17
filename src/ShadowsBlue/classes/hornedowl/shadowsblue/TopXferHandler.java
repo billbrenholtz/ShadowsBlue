@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hornedowl.shadowsblue;
 
 import java.awt.datatransfer.DataFlavor;
@@ -17,7 +12,10 @@ import javax.swing.TransferHandler;
 
 /**
  *
- * @author liberty
+ * @author Bill Brenholtz
+ * 
+ * Handles the dragging and dropping of a new directory on the scrolling window
+ * to effect change of scrolling images
  */
 class TopXferHandler extends TransferHandler {
 
@@ -29,11 +27,13 @@ class TopXferHandler extends TransferHandler {
         newDirStr = "";
     }
 
+    @Override
     public boolean canImport(TransferHandler.TransferSupport support) {
         return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public boolean importData(TransferHandler.TransferSupport support) {
         if (!canImport(support)) {
             return false;
