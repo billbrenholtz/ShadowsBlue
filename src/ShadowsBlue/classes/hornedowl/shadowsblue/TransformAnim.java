@@ -93,15 +93,16 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
         this.parent = parent;
 
         biw = screenRect.width;
-
+    }
+    
+    public void init() {
         //Drag and drop handler
         handler = new TopXferHandler();
         handler.addPropertyChangeListener(this);
 
         setTransferHandler(handler);
         addMouseListener(this);
-        addKeyListener(this);
-
+        addKeyListener(this);        
     }
 
     //traverse a directory to get image files names
