@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hornedowl.shadowsblue;
 
 import java.awt.BorderLayout;
@@ -17,7 +12,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
- * @author liberty
+ * @author Bill Brenholtz
+ * 
+ * create JDialog with full sized image
  */
 class PopupDialoger {
 
@@ -29,10 +26,18 @@ class PopupDialoger {
         screenRect = scrRect;
     }
 
+    /**
+     * 
+     * @param t - contains the image to be displayed
+     * @param xpos - x position that was clicked in parent window
+     * @param ypos - y position that was clicked in parent window
+     * @return 
+     */
     public JDialog createFull(Thimg t, int xpos, int ypos) {
         final JPanel dp = new JPanel();
         dp.setLayout(new BorderLayout());
         if (Paths.get(t.getFilename()).getParent() == null) {
+            //using my stock images that came with app
             dp.add(new JLabel(new ImageIcon(getClass().getResource(t.getFilename()))));
         } else {
             dp.add(new JLabel(new ImageIcon(t.getFilename())));
