@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hornedowl.shadowsblue;
 
 import java.io.IOException;
@@ -18,7 +13,9 @@ import java.util.List;
 
 /**
  *
- * @author valance
+ * @author Bill Brenholtz
+ *
+ * Workhorse of Files.walkFileTree
  */
 public class Finder extends SimpleFileVisitor<Path> {
 
@@ -26,11 +23,18 @@ public class Finder extends SimpleFileVisitor<Path> {
     private final ArrayList<String> fileList;
 
     Finder() {
+        //Look for GIFs, JPGs, PNGs
         matcher = FileSystems.getDefault().getPathMatcher("glob:*.{jpg,png,gif,JPG,PNG,GIF}");
         fileList = new ArrayList<>();
     }
 
-    // Invoke the pattern matching method on each file.
+    /**
+     * Add each filename matching pattern to list
+     *
+     * @param file - the file to check
+     * @param attrs
+     * @return
+     */
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
 
@@ -44,7 +48,7 @@ public class Finder extends SimpleFileVisitor<Path> {
     public List getFileList() {
         return fileList;
     }
-    
+
     @Override
     public FileVisitResult visitFileFailed(Path file, IOException exc) {
         //noinspection ThrowablePrintedToSystemOut
@@ -52,6 +56,9 @@ public class Finder extends SimpleFileVisitor<Path> {
         return CONTINUE;
     }
 
+    /**
+     * Use this if this is first run or something else is wrong
+     */
     public void useDefault() {
         fileList.add("photo_01.jpg");
         fileList.add("photo_02.jpg");
