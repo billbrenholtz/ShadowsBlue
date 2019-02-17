@@ -88,7 +88,14 @@ class Thimg implements ImageObserver, Serializable {
     }
 
     public void resizeImage(int newHeight) {
-        ImageIcon tmpIcon = new ImageIcon(filename);
+        Path checkFile = Paths.get(filename);
+        ImageIcon tmpIcon;
+        if (checkFile.getParent() == null) {
+            tmpIcon = new ImageIcon(getClass().getResource(filename));
+        }
+        else {
+            tmpIcon = new ImageIcon(filename);
+        }
         Image newImg = tmpIcon.getImage().getScaledInstance(-1, newHeight, Image.SCALE_DEFAULT);
         //noinspection unused
         double newThumbHeight = newImg.getHeight(this);
