@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hornedowl.shadowsblue;
 
 import java.awt.Dimension;
@@ -16,17 +11,20 @@ import java.nio.file.Paths;
 import javax.swing.ImageIcon;
 
 /**
- *
- * @author liberty An Image and its current translation
+ * 
+ * @author Bill Brenholtz
+ * 
+ * Container class that holds thumbnail image, original file name,
+ * AffineTransform and position data
  */
 class Thimg implements ImageObserver, Serializable {
 
-    private transient Image thumbImage;
-    private Point thumbPos;
+    private transient Image thumbImage;         //thumbnail image
+    private Point thumbPos;                     //current image position
     private int ix, iy;
-    private Dimension thumbDimension;
-    private transient AffineTransform afTran;
-    private String filename;
+    private Dimension thumbDimension;           //size of thumbnail
+    private transient AffineTransform afTran;   //needed to move image
+    private String filename;                    //file name of original image
 
     public Thimg() {
         filename = "";
@@ -46,20 +44,26 @@ class Thimg implements ImageObserver, Serializable {
         ix = 1;
         iy = 0;
 
-        setThumbImage(newFile, hite);
+        setThumbImage(hite);
     }
 
-    public final void setThumbImage(String filename, int ht) {
+    /**
+     * create the scaled thumbnail of original image
+     * @param ht - height to make thumbnail; width is scaled accordingly
+     */
+    public final void setThumbImage(int ht) {
         Path checkFile = Paths.get(filename);
         ImageIcon tmpIcon;
         if (checkFile.getParent() == null) {
+            //no parent, so this is stock image included with app
             tmpIcon = new ImageIcon(getClass().getResource(filename));
         }
         else {
             tmpIcon = new ImageIcon(filename);
         }
+        //resize image
         thumbImage = tmpIcon.getImage().getScaledInstance(-1, ht, Image.SCALE_DEFAULT);
-        //noinspection unused
+        //wait for image to finish resizing and then set new dimension
         int w = thumbImage.getWidth((img, infoflags, x, y, width, height) -> {
             if ((infoflags & ImageObserver.HEIGHT) != 0) {
                 if ((infoflags & ImageObserver.WIDTH) != 0) {
@@ -71,11 +75,18 @@ class Thimg implements ImageObserver, Serializable {
         });
     }
 
-    //update the transform position and wrapround if necessary
+    /**
+     * translate image to new position
+     */
     public void step() {
         thumbPos.translate(ix, iy);
     }
 
+    /**
+     * update the AffineTransform
+     * don't bother with anything that isn't visible
+     * @param width - area to determine visibility
+     */
     public void setTranslation(int width) {
         if (isVisible(width)) {
             afTran.setToIdentity();
@@ -83,24 +94,45 @@ class Thimg implements ImageObserver, Serializable {
         }
     }
 
+    /**
+     * determine visibility of me
+     * @param width - available area
+     * @return 
+     */
     public boolean isVisible(int width) {
         return (thumbPos.x >= -1 * thumbDimension.width) && (thumbPos.x <= width);
     }
 
+    /**
+     * create new thumbnail with 
+     * @param newHeight - height of thumbnail; width is scaled
+     */
     public void resizeImage(int newHeight) {
         Path checkFile = Paths.get(filename);
         ImageIcon tmpIcon;
         if (checkFile.getParent() == null) {
+            //no parent, so this is stock image included with app
             tmpIcon = new ImageIcon(getClass().getResource(filename));
         }
         else {
             tmpIcon = new ImageIcon(filename);
         }
+        //create new scaled thumbnail
         Image newImg = tmpIcon.getImage().getScaledInstance(-1, newHeight, Image.SCALE_DEFAULT);
-        //noinspection unused
+        //do this to start imageUpdate()
         double newThumbHeight = newImg.getHeight(this);
     }
 
+    /**
+     * wait for image to finish scaling before setting new thumbnail and new dimension
+     * @param mimg
+     * @param infoflags
+     * @param ix
+     * @param iy
+     * @param width
+     * @param height
+     * @return 
+     */
     @Override
     public boolean imageUpdate(Image mimg, int infoflags, int ix, int iy, int width, int height) {
         if ((infoflags & ImageObserver.HEIGHT) == 0) {
@@ -117,6 +149,10 @@ class Thimg implements ImageObserver, Serializable {
         return false;
     }
 
+    /**
+     * clone me from
+     * @param cloned - Thimg to be cloned
+     */
     public void clone(Thimg cloned) {
         if (cloned == null) {
             return;
@@ -173,5 +209,4 @@ class Thimg implements ImageObserver, Serializable {
     public String getFilename() {
         return filename;
     }
-
 }

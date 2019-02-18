@@ -72,7 +72,7 @@ public class Fetcher {
         for (Object t : saved) {
             newThimg = (Thimg) t;
             //serialization did not save these two things
-            newThimg.setThumbImage(newThimg.getFilename(), savedHeight);
+            newThimg.setThumbImage(savedHeight);
             newThimg.setAfTran(new AffineTransform());
             movers.add(newThimg);
         }
