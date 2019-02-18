@@ -17,30 +17,29 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
- * Animation images translating around a canvas.
+ * JPanel that performs the image animation, resizing, etc..
  */
 @SuppressWarnings("serial")
 class TransformAnim extends JPanel implements PropertyChangeListener, MouseListener, KeyListener {
 
-    private List<Thimg> movers;
-    private String picRootDir;
-    private int firstInLine;
-    private final long sleepAmount = 75;
-    private int biw, bih;
-    private boolean running = false;
-    private AnimationThread animationThread;
-    private ImageResizer resizer;
-    private boolean resizing = false;
-    private final Rectangle screenRect;
-    private JFrame parent;
-    private TopXferHandler handler;
-    private Fetcher fetcher;
+    private List<Thimg> movers;                 //the data that will be scrolled
+    private String picRootDir;                  //root directory of all present pictures
+    private int firstInLine;                    //index in movers of image on far right of window
+    private final long sleepAmount = 75;        //millisecs between translations
+    private int biw, bih;                       //current window width, height
+    private boolean running = false;            //are animations running?
+    private AnimationThread animationThread;    //performs the animations
+    private ImageResizer resizer;               //thread to resize current images
+    private boolean resizing = false;           //are we resizing:?
+    private final Rectangle screenRect;         //screen dimension
+    private final JFrame parent;
+    private TopXferHandler handler;             //performs image directory change via drag and drop
+    private final Fetcher fetcher;
 
     public TransformAnim(JFrame parent, Fetcher f, Rectangle rect) {
 
@@ -51,16 +50,20 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
         this.parent = parent;
         fetcher = f;
 
+        //use whole width of screen and saved or default height
         biw = screenRect.width;
         bih = fetcher.getSavedHeight();
     }
 
+    /**
+     * more setup better done outside constructor
+     */
     public void init() {
         //Drag and drop handler
         handler = new TopXferHandler();
         handler.addPropertyChangeListener(this);
-
         setTransferHandler(handler);
+        //stop and starts scrolling and clicking for full image displays
         addMouseListener(this);
         addKeyListener(this);
         
@@ -69,6 +72,10 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
         firstInLine = fetcher.getFirstInLine();
     }
 
+    /**
+     * perform the actual painting of images in the correct locations
+     * @param g 
+     */
     @Override
     public void paint(Graphics g) {
 
@@ -86,7 +93,7 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
         g2.setRenderingHint(KEY_RENDERING, VALUE_RENDER_SPEED);
         g2.clearRect(0, 0, biw, bih);
 
-        //paint those images that are within our boudary
+        //paint those images that are within our boundary
         for (Thimg th : movers) {
             if (th.isVisible(biw)) {
                 g2.setTransform(th.getAfTran());
@@ -96,7 +103,10 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
         g2.dispose();
     }
 
-    //display full image when image is clicked on
+    /**
+     * display full image in separate window when clicked on
+     * @param e 
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
 
@@ -115,9 +125,10 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
             }
         }
         if (xthimg != null) {
+            //found it
             PopupDialoger pd = new PopupDialoger(parent, screenRect);
-            //noinspection unused
-            JDialog jd = pd.createFull(xthimg, xpos, ypos);
+            //create JDialog and diaplay it
+            pd.createFull(xthimg, xpos, ypos);
         }
     }
 
@@ -129,13 +140,19 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
     public void mouseReleased(MouseEvent e) {
     }
 
-    //pause animation
+    /**
+     * pause animation on mouse enter
+     * @param e 
+     */
     @Override
     public void mouseEntered(MouseEvent e) {
         stop();
     }
 
-    //restart animation
+    /**
+     * restart animation on mouse exit
+     * @param e 
+     */
     @Override
     public void mouseExited(MouseEvent e) {
         start();
@@ -160,6 +177,9 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
     public void keyReleased(KeyEvent e) {
     }
 
+    /**
+     * start animation thread
+     */
     public void start() {
         animationThread = new AnimationThread();
         animationThread.setPriority(Thread.NORM_PRIORITY);
@@ -168,6 +188,9 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
         running = true;
     }
 
+    /**
+     * stop animation thread
+     */
     public synchronized void stop() {
         if (animationThread != null) {
             running = false;
@@ -176,12 +199,16 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
         }
     }
 
+    /**
+     * change scrolling images by dragging and dropping a new directory on the scrolling window
+     * @param evt 
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 
         //New directory dragged and dropped
         if (evt.getPropertyName().equalsIgnoreCase("newDirStr")) {
-            picRootDir = (String) evt.getNewValue();  //New starting directory dropped
+            picRootDir = (String) evt.getNewValue();
 
             stop(); //Hold everything
 
@@ -191,25 +218,27 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
             movers= fetcher.getMovers();
             firstInLine = 0;
 
-            start();
+            start();    //start up again
         }
     }
 
+    /**
+     * Thread that does heavy lifting of animation
+     */
     private class AnimationThread extends Thread {
 
         @Override
         public void run() {
             while (running) {
                 if (!movers.isEmpty()) {
-                    //is the current BufferedImage size not same as window?
-                    //(has window been resized?)
+                    //has window been resized?
                     Dimension d = getSize();
                     if (biw != d.width) {
-                        //reinitialize and remember new BufferedImage width
+                        //adjust to and remember new window width
                         biw = d.width;
                     }
                     if (bih != d.height) {
-                        //reinitialize and remember new BufferedImage height
+                        //adjust to and remember new window height
                         bih = d.height;
                         //we could detect mulitple resize operations
                         //if so kill any active resize operations until the
@@ -295,4 +324,4 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
     public int getBih() {
         return bih;
     }
-} // End TransformAnim
+}
