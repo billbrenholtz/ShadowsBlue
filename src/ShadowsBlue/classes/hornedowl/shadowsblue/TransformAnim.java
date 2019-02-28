@@ -66,7 +66,7 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
         //stop and starts scrolling and clicking for full image displays
         addMouseListener(this);
         addKeyListener(this);
-        
+
         movers = fetcher.getMovers();
         picRootDir = fetcher.getPicRootDir();
         firstInLine = fetcher.getFirstInLine();
@@ -74,7 +74,8 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
 
     /**
      * perform the actual painting of images in the correct locations
-     * @param g 
+     *
+     * @param g
      */
     @Override
     public void paint(Graphics g) {
@@ -105,7 +106,8 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
 
     /**
      * display full image in separate window when clicked on
-     * @param e 
+     *
+     * @param e
      */
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -126,9 +128,10 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
         }
         if (xthimg != null) {
             //found it
-            PopupDialoger pd = new PopupDialoger(parent, screenRect);
+            PopupDialoger pd = new PopupDialoger(parent);
             //create JDialog and diaplay it
-            pd.createFull(xthimg, xpos, ypos);
+            pd.init(xthimg);
+            pd.setVisible(true);
         }
     }
 
@@ -142,7 +145,8 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
 
     /**
      * pause animation on mouse enter
-     * @param e 
+     *
+     * @param e
      */
     @Override
     public void mouseEntered(MouseEvent e) {
@@ -151,7 +155,8 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
 
     /**
      * restart animation on mouse exit
-     * @param e 
+     *
+     * @param e
      */
     @Override
     public void mouseExited(MouseEvent e) {
@@ -200,8 +205,10 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
     }
 
     /**
-     * change scrolling images by dragging and dropping a new directory on the scrolling window
-     * @param evt 
+     * change scrolling images by dragging and dropping a new directory on the
+     * scrolling window
+     *
+     * @param evt
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -215,7 +222,7 @@ class TransformAnim extends JPanel implements PropertyChangeListener, MouseListe
             //Clear image cache and get new thumbnails
             movers.clear();
             fetcher.collectImages(picRootDir, getSize());
-            movers= fetcher.getMovers();
+            movers = fetcher.getMovers();
             firstInLine = 0;
 
             start();    //start up again
